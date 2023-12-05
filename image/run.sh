@@ -147,6 +147,8 @@ fi
 if [[ $fix_permissions == "true" ]]; then
   log INFO "Fixing permissions..."
   exec sudo -E bash /opt/fix_permissions.sh
+elif [ -e /scripts/init.sh ]; then
+   exec bash /scripts/init.sh
 else
   exec bash /opt/run_runner.sh
 fi
