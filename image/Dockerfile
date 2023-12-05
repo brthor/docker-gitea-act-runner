@@ -12,7 +12,7 @@
 
 FROM debian:stable-slim
 
-LABEL maintainer="Vegard IT GmbH (vegardit.com)"
+LABEL maintainer=""
 
 USER root
 
@@ -31,10 +31,10 @@ ARG BASE_LAYER_CACHE_KEY
 ARG FLAVOR
 ARG GITEA_ACT_RUNNER_VERSION
 
-RUN --mount=type=bind,source=.shared,target=/mnt/shared <<EOF
+RUN --mount=type=bind,source=/shared,target=/mnt/shared <<EOF
 
-  /mnt/shared/cmd/debian-install-os-updates.sh
-  /mnt/shared/cmd/debian-install-support-tools.sh
+  # /mnt/shared/cmd/debian-install-os-updates.sh
+  # /mnt/shared/cmd/debian-install-support-tools.sh
 
   function minimize() {
     ls -l "$@"
@@ -154,7 +154,7 @@ RUN --mount=type=bind,source=.shared,target=/mnt/shared <<EOF
   echo "#################################################"
   apt-get remove -y binutils curl
   rm -rf /opt/upx
-  /mnt/shared/cmd/debian-cleanup.sh
+  # /mnt/shared/cmd/debian-cleanup.sh
 
 EOF
 
