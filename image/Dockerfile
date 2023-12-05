@@ -203,7 +203,7 @@ EOF
 
 COPY image/*.sh /opt/
 COPY image/config.template.yaml /opt/
-COPY .shared/lib/bash-init.sh /opt/bash-init.sh
+# COPY .shared/lib/bash-init.sh /opt/bash-init.sh
 
 USER act
 
