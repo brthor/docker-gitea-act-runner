@@ -31,7 +31,8 @@ ARG BASE_LAYER_CACHE_KEY
 ARG FLAVOR
 ARG GITEA_ACT_RUNNER_VERSION
 
-RUN --mount=type=bind,source=/shared,target=/mnt/shared <<EOF
+# RUN --mount=type=bind,source=/shared,target=/mnt/shared <<EOF
+RUN <<EOF
 
   # /mnt/shared/cmd/debian-install-os-updates.sh
   # /mnt/shared/cmd/debian-install-support-tools.sh
