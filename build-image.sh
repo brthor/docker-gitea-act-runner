@@ -9,28 +9,28 @@ function curl() {
   command curl -sSfL --connect-timeout 10 --max-time 30 --retry 3 --retry-all-errors "$@"
 }
 
-shared_lib="$(dirname $0)/.shared"
-[ -e "$shared_lib" ] || curl https://raw.githubusercontent.com/vegardit/docker-shared/v1/download.sh?_=$(date +%s) | bash -s v1 "$shared_lib" || exit 1
-source "$shared_lib/lib/build-image-init.sh"
+# shared_lib="$(dirname $0)/.shared"
+# [ -e "$shared_lib" ] || curl https://raw.githubusercontent.com/vegardit/docker-shared/v1/download.sh?_=$(date +%s) | bash -s v1 "$shared_lib" || exit 1
+# source "$shared_lib/lib/build-image-init.sh"
+
+base_layer_cache_key=$(date +%Y%m%d)
 
 
 #################################################
 # check prereqs
 #################################################
 
-if [[ "${DOCKER_PUSH:-}" == "true" ]]; then
-  if ! hash regctl &>/dev/null; then
-    log ERROR "regctl (aka regclient) command line tool is misssing!"
-  fi
-fi
+# if [[ "${DOCKER_PUSH:-}" == "true" ]]; then
+#   if ! hash regctl &>/dev/null; then
+#     log ERROR "regctl (aka regclient) command line tool is misssing!"
+#   fi
+# fi
 
 
 #################################################
 # specify target docker registry/repo
 #################################################
 gitea_act_runner_version=${GITEA_ACT_RUNNER_VERSION:-latest}
-image_repo=${DOCKER_IMAGE_REPO:-vegardit/gitea-act-runner}
-
 
 #################################################
 # resolve gitea act runner version
@@ -41,21 +41,21 @@ case $gitea_act_runner_version in
   *)      gitea_act_runner_effective_version=$gitea_act_runner_version
           ;;
 esac
-image_name=$image_repo:${DOCKER_IMAGE_TAG_PREFIX:-}$gitea_act_runner_version
-image_name2=$image_repo:${DOCKER_IMAGE_TAG_PREFIX:-}$gitea_act_runner_effective_version
+
+image_name=${DOCKER_IMAGE_NAME:-localhost/gitea-act-runner:latest}
 
 
 #################################################
 # build the image
 #################################################
 log INFO "Building docker image [$image_name]..."
-if [[ $OSTYPE == "cygwin" || $OSTYPE == "msys" ]]; then
-  project_root=$(cygpath -w "$project_root")
-fi
+# if [[ $OSTYPE == "cygwin" || $OSTYPE == "msys" ]]; then
+#   project_root=$(cygpath -w "$project_root")
+# fi
 
 # https://github.com/docker/buildx/#building-multi-platform-images
 set -x
-docker run --privileged --rm tonistiigi/binfmt --install all
+# docker run --privileged --rm tonistiigi/binfmt --install all
 export DOCKER_CLI_EXPERIMENTAL=enabled # prevents "docker: 'buildx' is not a docker command."
 docker buildx create --use # prevents: error: multiple platforms feature is currently not supported for docker driver. Please switch to a different driver (eg. "docker buildx create --use")
 docker buildx build "$project_root" \
@@ -78,39 +78,6 @@ docker buildx build "$project_root" \
     echo -n "--platform linux/amd64,linux/arm64,linux/arm/v7"; \
   fi) \
   -t $image_name \
-  -t $image_name2 \
-  $(if [[ "${DOCKER_PUSH:-}" == "true" ]]; then echo -n "--push"; fi) \
   "$@"
 docker buildx stop
 set +x
-
-
-#################################################
-# push image to ghcr.io
-#################################################
-if [[ "${DOCKER_PUSH:-}" == "true" ]]; then
-  set -x;
-  docker image pull $image_name
-  regctl image copy $image_name ghcr.io/$image_name
-  regctl image copy $image_name2 ghcr.io/$image_name2
-  set +x
-fi
-
-
-#################################################
-# test image
-#################################################
-echo
-log INFO "Testing docker image [$image_name]..."
-set -x
-docker run --rm $image_name act_runner --version
-set +x
-echo
-
-
-#################################################
-# perform security audit
-#################################################
-if [[ "${DOCKER_AUDIT_IMAGE:-1}" == 1 ]]; then
-  bash "$shared_lib/cmd/audit-image.sh" $image_name
-fi
