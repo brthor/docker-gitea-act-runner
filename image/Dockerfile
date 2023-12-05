@@ -52,7 +52,7 @@ RUN <<EOF
   echo "#################################################"
   echo "Installing required packages..."
   echo "#################################################"
-  apt-get install --no-install-recommends -y binutils ca-certificates curl sudo tini
+  apt-get update && apt-get install --no-install-recommends -y binutils ca-certificates curl sudo tini
 
   if [[ $UPX_COMPRESS == "true" ]]; then
     echo "#################################################"
