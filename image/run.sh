@@ -5,7 +5,26 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-ArtifactOfProjectHomePage: https://github.com/vegardit/docker-gitea-act-runner
 
-source /opt/bash-init.sh
+# source /opt/bash-init.sh
+
+function log() {
+   # to prefix stdout and stderr of a command: the_command 2> >(log ERROR >&2) | log INFO &
+   level=${1:-INFO}
+   level=${level^^}
+   case $level in
+      INFO|WARN|ERROR) ;;
+      *) log ERROR "Unsupported log-level $level"; exit 1 ;;
+   esac
+
+   prefix="$(date "+%Y-%m-%d %H:%M:%S") $level [${BASH_SOURCE[1]}:$BASH_LINENO]"
+   if [ -p /dev/stdin ]; then
+      while read line; do
+         echo "$prefix $line"
+      done
+   else
+      echo "$prefix ${@:2}"
+   fi
+}
 
 #################################################################
 # print header
