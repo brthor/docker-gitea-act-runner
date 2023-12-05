@@ -34,9 +34,6 @@ ARG GITEA_ACT_RUNNER_VERSION
 # RUN --mount=type=bind,source=/shared,target=/mnt/shared <<EOF
 RUN <<EOF
 
-  # /mnt/shared/cmd/debian-install-os-updates.sh
-  # /mnt/shared/cmd/debian-install-support-tools.sh
-
   function minimize() {
     ls -l "$@"
     echo "Stripping [$*]..."
